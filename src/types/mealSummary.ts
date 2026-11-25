@@ -1,4 +1,4 @@
-export type MealCategory = 'breakfast' | 'lunch' | 'snack' | 'dinner' ;
+export type MealCategory = 'breakfast' | 'lunch' | 'snack' | 'dinner' | 'other';
 
 
 export interface MealItem {

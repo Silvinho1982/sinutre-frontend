@@ -4,7 +4,27 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Nutridash — Dashboard de Nutrição</title>
+    <meta
+      name="description"
+      content="SiNutre — acompanhe refeições, macronutrientes, meta calórica e métricas de saúde."
+    />
+    <title>SiNutre — Dashboard de Nutrição</title>
+    <script>
+      (function () {
+        try {
+          var stored = localStorage.getItem('sinutre.theme');
+          var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          var dark = stored ? stored === 'dark' : prefersDark;
+          document.documentElement.setAttribute(
+            'data-theme',
+            dark ? 'sinutre-dark' : 'sinutre',
+          );
+          document.documentElement.style.colorScheme = dark ? 'dark' : 'light';
+        } catch (error) {
+          /* mantém o tema claro padrão */
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

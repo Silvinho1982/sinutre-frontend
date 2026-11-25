@@ -1,4 +1,4 @@
-export type MealCategory = 'breakfast' | 'lunch' | 'snack' | 'dinner';
+export type MealCategory = 'breakfast' | 'lunch' | 'snack' | 'dinner' | 'other';
 
 export interface FoodItem {
   id: number;
@@ -32,7 +32,7 @@ export interface MacroSummary {
   proteins: number;
   fats: number;
   calories: number;
-  caloriesGoal: number;
+  caloriesGoal?: number;
 }
 
 export interface MealsSummary {

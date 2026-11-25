@@ -1,44 +1,25 @@
 import { Navigate } from 'react-router-dom';
-import { useAuth } from '@/context/AuthContext';
-import { getToken, setToken } from '@/lib/api';
-import { useEffect, useState } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
+import { getToken } from '@/lib/api';
 
-// Lê ?token=... do callback do backend (rota /auth/github/callback),
-// salva no localStorage e limpa a query string da URL.
-function consumeTokenFromUrl(): string | null {
-  const params = new URLSearchParams(window.location.search);
-  const token = params.get('token');
-  if (!token) return null;
-  setToken(token);
-  window.history.replaceState({}, '', window.location.pathname);
-  return token;
-}
+export function ProtectedRoute({ children }: { children: React.ReactNode }) {
+  const { user, loading } = useAuth();
 
-
-export function ProtectedRoute({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  const { loading } = useAuth();
-
-  const [token, setLocalToken] = useState<string | null>(
-      () => consumeTokenFromUrl() ?? getToken(),
+  if (loading) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center gap-3 bg-base-200">
+        <span className="loading loading-spinner loading-lg text-primary" />
+        <span className="text-sm text-base-content/60">Carregando sua conta...</span>
+      </div>
     );
+  }
 
-
-  useEffect(() => {
-      // Caso o token chegue depois do mount (ex.: voltando do GitHub).
-      const fromUrl = consumeTokenFromUrl();
-      if (fromUrl) setLocalToken(fromUrl);
-    }, []);
-    
-  if (!token) {
+  if (!user && !getToken()) {
     return <Navigate to="/login" replace />;
   }
 
-  if (loading) {
-    return <div>Carregando...</div>;
+  if (!user) {
+    return <Navigate to="/login" replace />;
   }
 
   return <>{children}</>;

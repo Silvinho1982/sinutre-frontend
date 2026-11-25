@@ -1,14 +1,13 @@
-import { useState, useMemo } from 'react';
-import type { FoodItem } from '@/types/meal';
+import { useEffect, useMemo, useState } from 'react';
+import { Warning } from '@phosphor-icons/react';
+import type { FoodItem, MealCategory, MealState } from '@/types/meal';
 import { MealItemForm } from './MealItemForm';
 import { MealItemsTable } from './MealItemsTable';
 import { MealMacrosSummary } from './MealMacrosSummary';
 import { MealMetadataForm } from './MealMetadataForm';
-import { MealCategory } from '@/types/meal';
 import { MEAL_CATEGORY_BY_ID } from '@/constants/mealCategories';
 import { createMeal } from '@/services/mealService';
-
-import { MealState } from '@/types/meal';
+import { getApiErrorDetails, getApiErrorMessage } from '@/lib/api';
 
 interface AddMealModalProps {
   open: boolean;
@@ -18,59 +17,81 @@ interface AddMealModalProps {
   onMealCreated: () => Promise<void>;
 }
 
+function nowForInput(): string {
+  const now = new Date();
+  const offset = now.getTimezoneOffset() * 60_000;
+  return new Date(now.getTime() - offset).toISOString().slice(0, 16);
+}
 
 export function AddMealModal({
   open,
   typeMeal,
   onClose,
-  //onSave,
-  onMealCreated
+  onMealCreated,
 }: AddMealModalProps) {
-  if(!typeMeal){
-    return <></>
-  }
-
-  const category = MEAL_CATEGORY_BY_ID[typeMeal];
-  
   const [meal, setMeal] = useState<MealState>({
     description: '',
-    type: category.id,
-    eatTime: '',
+    type: typeMeal ?? 'snack',
+    eatTime: nowForInput(),
   });
-
   const [items, setItems] = useState<FoodItem[]>([]);
+  const [error, setError] = useState('');
+  const [saving, setSaving] = useState(false);
 
-  function handleAddItem(
-    item: FoodItem,
-  ) {
-    setItems((current) => [
-      ...current,
-      item,
-    ]);
+  useEffect(() => {
+    if (open) {
+      setMeal({
+        description: '',
+        type: typeMeal ?? 'snack',
+        eatTime: nowForInput(),
+      });
+      setItems([]);
+      setError('');
+      setSaving(false);
+    }
+  }, [open, typeMeal]);
+
+  function handleAddItem(item: FoodItem) {
+    setItems((current) => [...current, item]);
   }
 
-  function handleRemoveItem(
-    item: FoodItem,
-  ) {
-    setItems((current) =>
-      current.filter(
-        (x) => x.id !== item.id,
-      ),
-    );
+  function handleRemoveItem(item: FoodItem) {
+    setItems((current) => current.filter((x) => x.id !== item.id));
   }
 
   async function handleSaveMeal() {
-    await createMeal({
-      ...meal,
-      items: items.map((item) => ({
-        foodId: item.foodId,
-        grams: item.grams,
-      })),
-    });
+    setError('');
 
-    await onMealCreated();
+    if (!meal.eatTime) {
+      setError('Informe a data e o horário da refeição.');
+      return;
+    }
 
-    onClose();
+    if (items.length === 0) {
+      setError('Adicione pelo menos um alimento à refeição.');
+      return;
+    }
+
+    try {
+      setSaving(true);
+      await createMeal({
+        ...meal,
+        items: items.map((item) => ({
+          foodId: item.foodId,
+          grams: item.grams,
+        })),
+      });
+      await onMealCreated();
+      onClose();
+    } catch (err) {
+      const details = getApiErrorDetails(err);
+      setError(
+        Object.values(details)[0] ??
+          getApiErrorMessage(err, 'Não foi possível salvar a refeição.'),
+      );
+    } finally {
+      setSaving(false);
+    }
   }
 
   const macros = useMemo(
@@ -81,7 +102,6 @@ export function AddMealModal({
           acc.proteins += item.protein;
           acc.fats += item.fat;
           acc.calories += item.calories;
-
           return acc;
         },
         {
@@ -95,27 +115,50 @@ export function AddMealModal({
     [items],
   );
 
+  const category = typeMeal ? MEAL_CATEGORY_BY_ID[typeMeal] : null;
+
+  if (!category) {
+    return null;
+  }
 
   return (
     <div className={`modal ${open ? 'modal-open' : ''}`} role="dialog">
       <div className="modal-box max-w-6xl">
-        <h2 className="text-3xl font-semibold mb-6">Adicionar Refeição</h2>
-        
+        <h2 className="text-2xl lg:text-3xl font-semibold mb-1">
+          Adicionar {category.label.toLowerCase()}
+        </h2>
+        <p className="text-sm text-base-content/60 mb-5">
+          Selecione alimentos já cadastrados e informe a quantidade em gramas.
+        </p>
+
+        {error && (
+          <div role="alert" className="alert alert-error mb-4 text-sm">
+            <Warning size={18} />
+            <span>{error}</span>
+          </div>
+        )}
+
         <MealMacrosSummary macros={macros} />
         <MealMetadataForm meal={meal} setMeal={setMeal} />
 
         <div className="mb-4">
-          <h3 className="text-lg font-semibold mb-4">Itens da Refeição</h3>
+          <h3 className="text-lg font-semibold mb-4">Itens da refeição</h3>
           <MealItemForm onAdd={handleAddItem} />
         </div>
 
         <MealItemsTable items={items} onRemove={handleRemoveItem} />
 
         <div className="modal-action">
-          <button type="button" className="btn btn-ghost" onClick={onClose}>
+          <button type="button" className="btn btn-ghost" onClick={onClose} disabled={saving}>
             Cancelar
           </button>
-          <button type="button" className="btn btn-primary" onClick={handleSaveMeal}>
+          <button
+            type="button"
+            className="btn btn-primary"
+            onClick={handleSaveMeal}
+            disabled={saving}
+          >
+            {saving && <span className="loading loading-spinner loading-sm" />}
             Salvar refeição
           </button>
         </div>

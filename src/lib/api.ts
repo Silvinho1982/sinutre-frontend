@@ -1,8 +1,9 @@
-// Cliente HTTP mínimo do front para o sinutre-back.
-// Lê a base do servidor de import.meta.env.VITE_API_URL.
+// Cliente HTTP do front para o sinutre-back.
 import axios from 'axios';
 
-export const API_URL = import.meta.env.VITE_API_URL;
+const rawBaseUrl = import.meta.env.VITE_API_URL ?? 'http://localhost:3333';
+
+export const API_URL = rawBaseUrl.replace(/\/$/, '');
 
 export const api = axios.create({
   baseURL: API_URL,
@@ -22,39 +23,44 @@ export function clearToken(): void {
   localStorage.removeItem(TOKEN_KEY);
 }
 
-// Envia uma requisição JSON ao backend já com Bearer token (se houver).
-// Joga em caso de status != 2xx.
-export async function apiFetch<T>(
-  path: string,
-  init: RequestInit = {},
-): Promise<T> {
-  const token = getToken();
-  const res = await fetch(`${API_URL}${path}`, {
-    ...init,
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...init.headers,
-    },
-  });
-
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(`${res.status} ${res.statusText}: ${text}`);
-  }
-
-  return res.json() as Promise<T>;
-}
-
-
-
 api.interceptors.request.use((config) => {
   const token = getToken();
 
   if (token) {
-    config.headers.Authorization =
-      `Bearer ${token}`;
+    config.headers.Authorization = `Bearer ${token}`;
   }
 
   return config;
 });
+
+interface ApiErrorBody {
+  error?: string;
+  details?: Record<string, string>;
+}
+
+export function getApiErrorDetails(error: unknown): Record<string, string> {
+  if (axios.isAxiosError<ApiErrorBody>(error)) {
+    return error.response?.data?.details ?? {};
+  }
+  return {};
+}
+
+export function getApiErrorMessage(
+  error: unknown,
+  fallback = 'Não foi possível concluir a operação. Tente novamente.',
+): string {
+  if (axios.isAxiosError<ApiErrorBody>(error)) {
+    if (!error.response) {
+      return 'Não foi possível conectar ao servidor. Verifique sua conexão.';
+    }
+
+    const body = error.response.data;
+    if (body?.error) return body.error;
+
+    if (error.response.status === 401) {
+      return 'Sua sessão expirou. Faça login novamente.';
+    }
+  }
+
+  return fallback;
+}
