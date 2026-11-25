@@ -7,7 +7,8 @@ macronutrientes. Desenvolvida em **React 19 + TypeScript + Vite + Tailwind CSS v
 ## Links de produção
 
 - **Frontend (Vercel):** _será preenchido após o deploy_
-- **Backend (Railway):** _será preenchido após o deploy_
+- **Backend (Railway):** https://sinutre-api-production.up.railway.app
+- **Healthcheck da API:** https://sinutre-api-production.up.railway.app/health
 - **Repositório do backend:** https://github.com/Silvinho1982/sinutre-backend
 
 ## Funcionalidades desenvolvidas
