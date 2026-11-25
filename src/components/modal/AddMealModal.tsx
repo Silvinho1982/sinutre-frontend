@@ -76,6 +76,7 @@ export function AddMealModal({
       setSaving(true);
       await createMeal({
         ...meal,
+        eatTime: new Date(meal.eatTime).toISOString(),
         items: items.map((item) => ({
           foodId: item.foodId,
           grams: item.grams,

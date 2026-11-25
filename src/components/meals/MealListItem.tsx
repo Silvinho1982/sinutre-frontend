@@ -1,4 +1,4 @@
-import { DotsThreeVertical } from '@phosphor-icons/react';
+import { Trash } from '@phosphor-icons/react';
 import { MEAL_CATEGORY_BY_ID } from '@/constants/mealCategories';
 import type { Meal } from '@/types/mealSummary';
 import { formatDate } from '@/utils/date';
@@ -20,7 +20,7 @@ export function MealListItem({ meal, onActionClick }: MealListItemProps) {
         </div>
         <div className="flex-1 min-w-0">
           <p className="font-semibold text-sm">{category.label}</p>
-          <p className="font-semibold text-sm">{meal.name}</p>
+          <p className="font-semibold text-sm">{meal.name ?? 'Sem descrição'}</p>
           <p className="text-xs text-base-content/50">{formatDate(meal.eatTime)}</p>
         </div>
         <span className="badge badge-primary badge-outline badge-sm">
@@ -29,10 +29,11 @@ export function MealListItem({ meal, onActionClick }: MealListItemProps) {
         <button
           type="button"
           onClick={() => onActionClick?.(meal)}
-          className="btn btn-ghost btn-sm btn-square"
-          aria-label="Mais ações"
+          className="btn btn-ghost btn-sm btn-square text-error"
+          aria-label="Excluir refeição"
+          title="Excluir refeição"
         >
-          <DotsThreeVertical size={18} />
+          <Trash size={18} />
         </button>
       </div>
     </article>

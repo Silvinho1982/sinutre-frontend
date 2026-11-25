@@ -33,6 +33,9 @@ export function DashboardPage() {
   const [dashboard, setDashboard] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [deletingMeal, setDeletingMeal] = useState<Meal | null>(null);
+  const [deleteError, setDeleteError] = useState('');
+  const [deleteBusy, setDeleteBusy] = useState(false);
 
   async function loadData() {
     try {
@@ -53,6 +56,22 @@ export function DashboardPage() {
   useEffect(() => {
     loadData();
   }, []);
+
+  async function handleDeleteMeal() {
+    if (!deletingMeal) return;
+
+    try {
+      setDeleteBusy(true);
+      setDeleteError('');
+      await api.delete(`/meals/${deletingMeal.id}`);
+      setDeletingMeal(null);
+      await loadData();
+    } catch (err) {
+      setDeleteError(getApiErrorMessage(err, 'Não foi possível excluir a refeição.'));
+    } finally {
+      setDeleteBusy(false);
+    }
+  }
 
   const mealsSummary = useMemo(
     () => ({
@@ -227,13 +246,56 @@ export function DashboardPage() {
           </section>
         ) : (
           <>
-            <MealsTable meals={meals} />
-            <MealsList meals={meals} />
+            <MealsTable meals={meals} onActionClick={setDeletingMeal} />
+            <MealsList meals={meals} onActionClick={setDeletingMeal} />
           </>
         )}
       </div>
 
       <MealFab onSelectCategory={modal.openWith} />
+
+      {deletingMeal && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-black/50">
+          <div className="card bg-base-100 w-full max-w-md shadow-2xl">
+            <div className="card-body gap-4">
+              <div className="flex items-center gap-3 text-error">
+                <Warning size={28} weight="fill" />
+                <h2 className="card-title">Excluir refeição?</h2>
+              </div>
+              <p className="text-sm text-base-content/70">
+                A refeição <strong>{deletingMeal.name ?? 'sem descrição'}</strong> será
+                removida e deixará de contar nas suas métricas.
+              </p>
+
+              {deleteError && (
+                <div role="alert" className="alert alert-error text-sm">
+                  <span>{deleteError}</span>
+                </div>
+              )}
+
+              <div className="modal-action">
+                <button
+                  type="button"
+                  className="btn btn-ghost"
+                  onClick={() => setDeletingMeal(null)}
+                  disabled={deleteBusy}
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-error"
+                  onClick={handleDeleteMeal}
+                  disabled={deleteBusy}
+                >
+                  {deleteBusy && <span className="loading loading-spinner loading-sm" />}
+                  Excluir
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <AddMealModal
         open={modal.open}

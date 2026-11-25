@@ -33,6 +33,24 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const status = axios.isAxiosError(error) ? error.response?.status : undefined;
+    const url = axios.isAxiosError(error) ? error.config?.url ?? '' : '';
+    const isAuthAttempt = url.startsWith('/auth/login') || url.startsWith('/auth/register');
+
+    if (status === 401 && !isAuthAttempt) {
+      clearToken();
+      if (window.location.pathname !== '/login') {
+        window.location.assign('/login');
+      }
+    }
+
+    return Promise.reject(error);
+  },
+);
+
 interface ApiErrorBody {
   error?: string;
   details?: Record<string, string>;

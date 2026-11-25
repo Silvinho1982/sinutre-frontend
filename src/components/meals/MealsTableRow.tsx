@@ -1,4 +1,4 @@
-import { DotsThree } from '@phosphor-icons/react';
+import { Trash } from '@phosphor-icons/react';
 import { MEAL_CATEGORY_BY_ID } from '@/constants/mealCategories';
 import type { Meal } from '@/types/mealSummary';
 import { formatDate } from '@/utils/date';
@@ -14,7 +14,7 @@ export function MealsTableRow({ meal, onActionClick }: MealsTableRowProps) {
   return (
     <tr className="hover">
       <td className="text-center font-bold text-base-content/60">{meal.id}</td>
-      <td className="font-medium">{meal.name}</td>
+      <td className="font-medium">{meal.name ?? 'Sem descrição'}</td>
       <td className="font-medium">{formatDate(meal.eatTime)}</td>
       <td className="font-semibold">{category.label}</td>
       <td>
@@ -26,10 +26,11 @@ export function MealsTableRow({ meal, onActionClick }: MealsTableRowProps) {
         <button
           type="button"
           onClick={() => onActionClick?.(meal)}
-          className="btn btn-sm btn-ghost btn-square"
-          aria-label="Mais ações"
+          className="btn btn-sm btn-ghost btn-square text-error"
+          aria-label="Excluir refeição"
+          title="Excluir refeição"
         >
-          <DotsThree size={20} />
+          <Trash size={18} />
         </button>
       </td>
     </tr>

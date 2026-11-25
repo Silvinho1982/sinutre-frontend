@@ -62,7 +62,7 @@ export function LoginPage() {
     providersRequest()
       .then((providers) => setGithubEnabled(providers.github))
       .catch(() => setGithubEnabled(false));
-  }, [navigate]);
+  }, [navigate, applyToken]);
 
   if (loading || tokenProcessing) {
     return (

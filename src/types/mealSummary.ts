@@ -19,7 +19,7 @@ export interface MealItem {
 
 export interface Meal {
   id: number;
-  name: string;
+  name: string | null;
   type: MealCategory;
 
   createdAt: string;
