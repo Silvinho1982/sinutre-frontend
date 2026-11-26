@@ -172,9 +172,11 @@ export function MetricsPage() {
                 <p className="text-sm text-base-content/70">{imc.description}</p>
 
                 <div className="flex items-center gap-2 text-xs text-base-content/50">
-                  <span>Peso: {metrics?.profile.weight} kg</span>
+                  <span>
+                    Peso: {metrics?.profile.weight?.toLocaleString('pt-BR') ?? '—'} kg
+                  </span>
                   <span>•</span>
-                  <span>Altura: {metrics?.profile.height} cm</span>
+                  <span>Altura: {metrics?.profile.height ?? '—'} cm</span>
                 </div>
               </>
             ) : (
