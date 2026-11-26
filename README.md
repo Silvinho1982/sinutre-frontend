@@ -6,10 +6,19 @@ macronutrientes. Desenvolvida em **React 19 + TypeScript + Vite + Tailwind CSS v
 
 ## Links de produção
 
-- **Frontend (Vercel):** _será preenchido após o deploy_
+- **Frontend (Vercel):** https://sinutre-frontend-zeta.vercel.app
 - **Backend (Railway):** https://sinutre-api-production.up.railway.app
 - **Healthcheck da API:** https://sinutre-api-production.up.railway.app/health
 - **Repositório do backend:** https://github.com/Silvinho1982/sinutre-backend
+
+### Conta de demonstração
+
+| E-mail | Senha |
+| --- | --- |
+| `demo@sinutre.app` | `Sinutre123` |
+
+A conta já vem com meta de 2.200 kcal, perfil preenchido (1,76 m / 74,5 kg) e
+alimentos e refeições de exemplo para navegar pelo dashboard e pelas métricas.
 
 ## Funcionalidades desenvolvidas
 
@@ -95,7 +104,13 @@ src/
 
 ## Deploy na Vercel
 
+O deploy de produção está publicado em
+**https://sinutre-frontend-zeta.vercel.app**.
+
+Para publicar novamente:
+
 1. Importe este repositório em [vercel.com](https://vercel.com).
 2. Framework: **Vite** (build `npm run build`, output `dist`).
-3. Configure `VITE_API_URL` com a URL do backend no Railway.
-4. O `vercel.json` já redireciona rotas do SPA para `index.html`.
+3. Configure `VITE_API_URL` com a URL do backend no Railway (o arquivo
+   `.env.production` já contém esse valor para builds locais).
+4. O `vercel.json` já redireciona as rotas do SPA para `index.html`.

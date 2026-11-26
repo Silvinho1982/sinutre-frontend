@@ -31,14 +31,18 @@ const EMPTY_FORM: FormState = {
   fatPer100g: '',
 };
 
+function formatNumber(value: number): string {
+  return String(Math.round(value * 100) / 100);
+}
+
 function toForm(food: Food | null): FormState {
   if (!food) return EMPTY_FORM;
   return {
     name: food.name,
-    caloriesPer100g: String(food.caloriesPer100g),
-    carbsPer100g: String(food.carbsPer100g),
-    proteinPer100g: String(food.proteinPer100g),
-    fatPer100g: String(food.fatPer100g),
+    caloriesPer100g: formatNumber(food.caloriesPer100g),
+    carbsPer100g: formatNumber(food.carbsPer100g),
+    proteinPer100g: formatNumber(food.proteinPer100g),
+    fatPer100g: formatNumber(food.fatPer100g),
   };
 }
 
